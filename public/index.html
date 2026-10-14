@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PersonaIPTV</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">PersonaIPTV</div>
+      <nav>
+        <a href="#playlists">Playlists</a>
+        <a href="#submit">Submit channel</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Curated streaming</p>
+          <h1>IPTV playlists built for people.</h1>
+          <p class="subtitle">
+            Browse curated channels, open an M3U playlist in your favorite player, and submit public M3U8 sources to the community queue.
+          </p>
+          <div class="actions">
+            <a class="btn primary" href="../playlists/index.m3u">Open playlist</a>
+            <a class="btn secondary" href="#submit">Submit a channel</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="playlists" class="cards">
+        <div class="card">
+          <h3>News</h3>
+          <a href="../playlists/news.m3u">news.m3u</a>
+        </div>
+        <div class="card">
+          <h3>Sports</h3>
+          <a href="../playlists/sports.m3u">sports.m3u</a>
+        </div>
+        <div class="card">
+          <h3>Movies</h3>
+          <a href="../playlists/movies.m3u">movies.m3u</a>
+        </div>
+        <div class="card">
+          <h3>Kids</h3>
+          <a href="../playlists/kids.m3u">kids.m3u</a>
+        </div>
+        <div class="card">
+          <h3>Music</h3>
+          <a href="../playlists/music.m3u">music.m3u</a>
+        </div>
+        <div class="card">
+          <h3>Documentary</h3>
+          <a href="../playlists/documentary.m3u">documentary.m3u</a>
+        </div>
+      </section>
+
+      <section id="submit" class="submit-box">
+        <h2>Submit a channel</h2>
+        <p>Include a name, country, category, and direct M3U8 link or stream URL.</p>
+        <a class="btn primary" href="https://github.com/LerainzerGit/PersonaIPTV/issues/new?template=channel_submission.md&title=Channel+submission" target="_blank" rel="noreferrer">
+          Submit via GitHub issue
+        </a>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
