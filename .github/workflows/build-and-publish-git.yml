@@ -1,0 +1,91 @@
+name: Build and publish PersonaIPTV (git push)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: personaiptv-git-deploy
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Show workspace (debug)
+        run: |
+          echo "PWD: $(pwd)"
+          ls -la
+
+      - name: Detect build script
+        id: detect
+        run: |
+          if [ -f scripts/build-playlists.js ]; then
+            echo "build_script=dash" >> $GITHUB_OUTPUT
+          elif [ -f scripts/build_playlists.js ]; then
+            echo "build_script=underscore" >> $GITHUB_OUTPUT
+          else
+            echo "build_script=none" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run build (dash)
+        if: steps.detect.outputs.build_script == 'dash'
+        run: |
+          npm ci --silent || npm install --silent
+          npm run build
+
+      - name: Run build (underscore)
+        if: steps.detect.outputs.build_script == 'underscore'
+        run: |
+          npm ci --silent || npm install --silent
+          node scripts/build_playlists.js
+
+      - name: Ensure public folder exists and copy data for client
+        run: |
+          if [ ! -d public ]; then
+            echo "No public/ directory found — creating placeholder"
+            mkdir -p public
+            cat > public/index.html <<'HTML'
+<!doctype html><html><head><meta charset="utf-8"><title>PersonaIPTV</title></head><body><h1>PersonaIPTV</h1><p>Placeholder site — build step didn't produce public/</p></body></html>
+HTML
+          fi
+          # Make sure the client can fetch the channel data from /data/seed-channels.json
+          mkdir -p public/data
+          if [ -f data/seed-channels.json ]; then
+            cp data/seed-channels.json public/data/seed-channels.json
+            echo "Copied data/seed-channels.json -> public/data/seed-channels.json"
+          else
+            echo "No data/seed-channels.json found; client may not show channels"
+          fi
+
+      - name: List public contents (debug)
+        run: ls -la public || true
+
+      - name: Deploy public/ to gh-pages via git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -e
+          # Configure a temporary repo in the public/ folder and push to gh-pages
+          cd public
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+          # allow empty commit if nothing changed
+          git commit -m "Deploy PersonaIPTV site: $GITHUB_SHA" || git commit --allow-empty -m "Deploy PersonaIPTV site: $GITHUB_SHA"
+          git branch -M gh-pages
+          REMOTE="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO}.git"
+          # Force push to overwrite gh-pages branch with the content of public/
+          git push --force "$REMOTE" gh-pages:gh-pages
