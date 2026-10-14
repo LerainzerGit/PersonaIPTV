@@ -1,0 +1,64 @@
+name: Repo diagnostics (build script)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnostics:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Workspace & git tree
+        run: |
+          echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
+          echo "GITHUB_REF: $GITHUB_REF"
+          echo "GITHUB_SHA: $GITHUB_SHA"
+          echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+          echo "PWD: $(pwd)"
+          echo
+          echo "Root listing:"
+          ls -la || true
+          echo
+          echo "All tracked files (git ls-tree):"
+          git ls-tree -r --name-only HEAD || true
+          echo
+          echo "Scripts folder listing:"
+          ls -la scripts || echo "scripts folder: missing"
+          echo
+          echo "Data folder listing:"
+          ls -la data || echo "data folder: missing"
+          echo
+          echo "package.json content:"
+          if [ -f package.json ]; then cat package.json; else echo "package.json missing"; fi
+          echo
+          echo "Attempt to show build script file (scripts/build-playlists.js):"
+          if [ -f scripts/build-playlists.js ]; then
+            echo "=== BEGIN scripts/build-playlists.js ==="
+            sed -n '1,200p' scripts/build-playlists.js || true
+            echo "=== END scripts/build-playlists.js ==="
+          else
+            echo "scripts/build-playlists.js: NOT FOUND"
+          fi
+          echo
+          echo "Attempt to show data/seed-channels.json:"
+          if [ -f data/seed-channels.json ]; then
+            echo "=== BEGIN data/seed-channels.json ==="
+            sed -n '1,200p' data/seed-channels.json || true
+            echo "=== END data/seed-channels.json ==="
+          else
+            echo "data/seed-channels.json: NOT FOUND"
+          fi
+
+      - name: Node & environment
+        run: |
+          node --version || echo "node missing"
+          which node || true
+          echo "ls -la node_modules (root):"
+          ls -la node_modules || true
