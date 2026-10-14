@@ -1,0 +1,119 @@
+name: Build and publish PersonaIPTV (git push)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: personaiptv-git-deploy
+  cancel-in-progress: true
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    env:
+      REPO: ${{ github.repository }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Show workspace (debug)
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Git ref: $GITHUB_REF"
+          ls -la
+
+      - name: Detect build script
+        id: detect
+        run: |
+          if [ -f scripts/build-playlists.js ]; then
+            echo "build_script=dash" >> $GITHUB_OUTPUT
+          elif [ -f scripts/build_playlists.js ]; then
+            echo "build_script=underscore" >> $GITHUB_OUTPUT
+          else
+            echo "build_script=none" >> $GITHUB_OUTPUT
+          fi
+          echo "detected build_script=${{ steps.detect.outputs.build_script }}" || true
+
+      - name: Run build (dash)
+        if: steps.detect.outputs.build_script == 'dash'
+        run: |
+          echo "Using scripts/build-playlists.js"
+          npm ci --silent || npm install --silent
+          npm run build
+
+      - name: Run build (underscore)
+        if: steps.detect.outputs.build_script == 'underscore'
+        run: |
+          echo "Using scripts/build_playlists.js"
+          npm ci --silent || npm install --silent
+          node scripts/build_playlists.js
+
+      - name: Ensure public folder exists and copy data for client
+        run: |
+          if [ ! -d public ]; then
+            echo "No public/ directory found — creating placeholder"
+            mkdir -p public
+            printf '%s\n' '<!doctype html>' '<html>' '<head><meta charset="utf-8"><title>PersonaIPTV</title></head>' '<body>' '<h1>PersonaIPTV</h1>' '<p>Placeholder site — replace with your built site.</p>' '</body>' '</html>' > public/index.html
+          fi
+          mkdir -p public/data
+          if [ -f data/seed-channels.json ]; then
+            cp data/seed-channels.json public/data/seed-channels.json
+            echo "Copied data/seed-channels.json -> public/data/seed-channels.json"
+          else
+            echo "Warning: data/seed-channels.json not found"
+          fi
+
+      - name: List public contents (debug)
+        run: |
+          echo "public/ contents:"
+          ls -la public || true
+          echo "public/data/ contents:"
+          ls -la public/data || true
+
+      - name: Deploy public/ to gh-pages via git push (try GITHUB_TOKEN then PAT)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          GH_PAGES_PAT: ${{ secrets.GH_PAGES_PAT || '' }}
+        run: |
+          set -e
+          cd public
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+          git commit -m "Deploy PersonaIPTV site: ${GITHUB_SHA}" || git commit --allow-empty -m "Deploy PersonaIPTV site: ${GITHUB_SHA}"
+          git branch -M gh-pages
+
+          REMOTE_GITHUB_TOKEN="https://x-access-token:${GITHUB_TOKEN}@github.com/${REPO}.git"
+          echo "Attempting to push to gh-pages using GITHUB_TOKEN..."
+          if git push --force "$REMOTE_GITHUB_TOKEN" gh-pages:gh-pages; then
+            echo "Pushed to gh-pages using GITHUB_TOKEN"
+            exit 0
+          else
+            echo "Push with GITHUB_TOKEN failed; will try PAT if available."
+          fi
+
+          if [ -n "${GH_PAGES_PAT}" ]; then
+            REMOTE_PAT="https://x-access-token:${GH_PAGES_PAT}@github.com/${REPO}.git"
+            echo "Attempting to push to gh-pages using GH_PAGES_PAT..."
+            if git push --force "$REMOTE_PAT" gh-pages:gh-pages; then
+              echo "Pushed to gh-pages using GH_PAGES_PAT"
+              exit 0
+            else
+              echo "Push with GH_PAGES_PAT failed."
+              exit 1
+            fi
+          else
+            echo "No GH_PAGES_PAT secret configured. To retry using a PAT, create a repo secret named GH_PAGES_PAT with a personal access token (repo scope) and re-run."
+            exit 1
+          fi
