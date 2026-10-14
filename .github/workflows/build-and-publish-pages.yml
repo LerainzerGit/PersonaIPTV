@@ -1,0 +1,62 @@
+name: Build and publish PersonaIPTV (Pages v4)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: personaiptv-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure public/index.html exists (placeholder if missing)
+        run: |
+          if [ -f public/index.html ]; then
+            echo "Found public/index.html"
+          else
+            echo "public/index.html not found — creating placeholder"
+            mkdir -p public
+            printf '%s\n' '<!doctype html>' '<html>' '<head><meta charset="utf-8"><title>PersonaIPTV</title></head>' '<body>' '<h1>PersonaIPTV</h1>' '<p>Placeholder site — replace with your built site.</p>' '</body>' '</html>' > public/index.html
+          fi
+          # copy JSON so client can fetch /data/seed-channels.json from the published site
+          mkdir -p public/data
+          if [ -f data/seed-channels.json ]; then
+            cp data/seed-channels.json public/data/seed-channels.json
+            echo "Copied data/seed-channels.json -> public/data/seed-channels.json"
+          else
+            echo "Warning: data/seed-channels.json not found"
+          fi
+
+      - name: List public contents (debug)
+        run: |
+          echo "public/ contents:"
+          ls -la public || true
+          echo "public/data/ contents:"
+          ls -la public/data || true
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v2
