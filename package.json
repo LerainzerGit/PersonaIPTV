@@ -1,0 +1,11 @@
+{
+  "name": "personaiptv",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-playlists.js",
+    "serve": "python3 -m http.server 8000 --directory public"
+  },
+  "description": "Curated IPTV playlists and submission workflow for PersonaIPTV",
+  "license": "MIT"
+}
