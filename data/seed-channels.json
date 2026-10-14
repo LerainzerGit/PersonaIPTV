@@ -1,0 +1,74 @@
+[
+  {
+    "name": "BBC One",
+    "category": "news",
+    "tvgId": "bbc1.uk",
+    "group": "News",
+    "logo": "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=80&q=80",
+    "url": "https://example.com/streams/bbc-one.m3u8"
+  },
+  {
+    "name": "CNN International",
+    "category": "news",
+    "tvgId": "cnn.int",
+    "group": "News",
+    "logo": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=80&q=80",
+    "url": "https://example.com/streams/cnn.m3u8"
+  },
+  {
+    "name": "France 24",
+    "category": "news",
+    "tvgId": "france24.fr",
+    "group": "News",
+    "logo": "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?auto=format&fit=crop&w=80&q=80",
+    "url": "https://example.com/streams/france24.m3u8"
+  },
+  {
+    "name": "ESPN",
+    "category": "sports",
+    "tvgId": "espn.us",
+    "group": "Sports",
+    "logo": "https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=80&q=80",
+    "url": "https://example.com/streams/espn.m3u8"
+  },
+  {
+    "name": "Sky Sports News",
+    "category": "sports",
+    "tvgId": "skysportsnews.uk",
+    "group": "Sports",
+    "logo": "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=80&q=80",
+    "url": "https://example.com/streams/skysportsnews.m3u8"
+  },
+  {
+    "name": "Movie Night",
+    "category": "movies",
+    "tvgId": "movienight.us",
+    "group": "Movies",
+    "logo": "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=80&q=80",
+    "url": "https://example.com/streams/movienight.m3u8"
+  },
+  {
+    "name": "Cartoon Network",
+    "category": "kids",
+    "tvgId": "cartoonnetwork.us",
+    "group": "Kids",
+    "logo": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=80&q=80",
+    "url": "https://example.com/streams/cartoonnetwork.m3u8"
+  },
+  {
+    "name": "MTV Hits",
+    "category": "music",
+    "tvgId": "mtvhits.us",
+    "group": "Music",
+    "logo": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=80&q=80",
+    "url": "https://example.com/streams/mtvhits.m3u8"
+  },
+  {
+    "name": "National Geographic",
+    "category": "documentary",
+    "tvgId": "natgeo.us",
+    "group": "Documentary",
+    "logo": "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=80&q=80",
+    "url": "https://example.com/streams/natgeo.m3u8"
+  }
+]
